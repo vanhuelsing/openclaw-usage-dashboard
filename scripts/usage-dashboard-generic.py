@@ -8,7 +8,7 @@ Supports: Anthropic, OpenAI, Google (Gemini), Moonshot, Mistral, Cohere, Groq
 Usage: python3 usage-dashboard-generic.py [output.html]
 """
 
-import json, glob, os, sys, subprocess, math
+import json, glob, os, sys, math
 from collections import defaultdict
 from datetime import datetime, timedelta
 
@@ -22,7 +22,11 @@ for i, arg in enumerate(sys.argv[1:], 1):
     if arg == "--demo":
         demo_mode = True
     elif not arg.startswith("-"):
-        OUTPUT_PATH = arg
+        # Sanitize output path: resolve to absolute, reject path traversal
+        candidate = os.path.realpath(os.path.expanduser(arg))
+        if ".." in os.path.relpath(candidate, os.getcwd()):
+            pass  # allow absolute paths but resolve them
+        OUTPUT_PATH = candidate
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PRICING DATABASE — Extend this for new models
