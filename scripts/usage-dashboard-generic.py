@@ -524,6 +524,8 @@ body {{
   margin-bottom: 32px;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 100;
 }}
 .header-title {{
   font-size: 15px;
