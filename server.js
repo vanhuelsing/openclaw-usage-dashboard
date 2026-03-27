@@ -19,10 +19,10 @@ const os = require('os');
 //   - df (Linux/macOS disk free)
 //   - powershell / wmic (Windows disk free)
 //   - openclaw version (version string)
-//   - xdg-open / open (auto-open browser on start)
+//   - xdg-open / open / start (auto-open browser — uses spawn with array args, NO shell)
 // No user input is ever interpolated into any shell command.
 // All calls have explicit timeouts and are wrapped in try/catch.
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
 const DEFAULT_PORT = 7842;
@@ -431,9 +431,12 @@ function getSystemInfo() {
         } catch { /* ignore */ }
       }
     } else {
+      // Use spawnSync to avoid shell interpolation of home path
+      const { spawnSync } = require('child_process');
       const home = os.homedir();
-      const out = execSync(`df -k "${home}" | tail -1`, { timeout: 3000, encoding: 'utf8' });
-      const parts = out.trim().split(/\s+/);
+      const dfResult = spawnSync('df', ['-k', home], { timeout: 3000, encoding: 'utf8' });
+      const dfLines = (dfResult.stdout || '').trim().split('\n');
+      const parts = (dfLines[dfLines.length - 1] || '').trim().split(/\s+/);
       if (parts.length >= 4) diskFree = parseInt(parts[3]) * 1024;
     }
   } catch { /* ignore */ }
@@ -618,10 +621,13 @@ server.listen(PORT, HOST, () => {
   console.log(`   Data source: ${OPENCLAW_HOME}`);
   console.log(`   Press Ctrl+C to stop\n`);
   
-  // Auto-open browser (optional)
+  // Auto-open browser (optional) — uses spawn with array args (no shell, no injection risk)
   if (process.argv.includes('--open')) {
-    const open = process.platform === 'win32' ? 'start' : process.platform === 'darwin' ? 'open' : 'xdg-open';
-    try { execSync(`${open} http://${HOST}:${PORT}`, { timeout: 3000 }); } catch {}
+    const url = `http://localhost:${PORT}`;
+    const cmd = process.platform === 'win32' ? ['cmd', ['/c', 'start', url]]
+              : process.platform === 'darwin' ? ['open', [url]]
+              : ['xdg-open', [url]];
+    try { spawn(cmd[0], cmd[1], { detached: true, stdio: 'ignore' }).unref(); } catch {}
   }
 });
 
