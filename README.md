@@ -1,85 +1,57 @@
 # OpenClaw Usage Dashboard
 
-Interactive HTML dashboard for [OpenClaw](https://github.com/openclaw/openclaw) API usage, costs, and rate-limit quotas across multiple LLM providers.
+A zero-dependency Node.js dashboard that reads your OpenClaw session logs and visualises token usage, model activity, and system health in real time. Runs entirely on your machine — no data ever leaves localhost.
 
-![Providers](https://img.shields.io/badge/providers-7-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
+![Dashboard](references/screenshot.png)
 
 ## Features
 
-- **Cost KPIs** — Total spend, today's cost, API calls, cache hit rate, monthly projection
-- **Provider & Limits** — Per-provider plan selection with spend tracking against plan limits
-  - Auto-detect active providers from usage data
-  - Plan dropdown per provider (stored in localStorage)
-  - Progress bars per model class with color-coded status (🟢 <70%, 🟡 70-89%, 🔴 ≥90%)
-  - Multiple time windows (5h rolling, 7d weekly, monthly, daily)
-  - Countdown timers for reset times
-  - Direct links to each provider's status page
-- **Model config** — Active / default / fallback models from `openclaw.json`
-- **Donut chart** — Cost distribution by model (SVG)
-- **Hourly sparkline** — Today's call volume
-- **Stacked bars** — Cost by period (daily / weekly / monthly / yearly)
-- **Model table** — Per-model breakdown with token counts
-- **Budget tracker** — Monthly limit with localStorage persistence
-- **CSV export** — Download any period view
-- **Provider filter** — Dropdown to filter by provider
-- **Demo mode** — Generate realistic multi-provider mock data
-
-## Supported Providers
-
-| Provider | Models | Plans |
-|---|---|---|
-| Anthropic | Claude Opus, Sonnet, Haiku | Pro, Max 5x/20x, Team, API Tier 1-4 |
-| OpenAI | GPT-4o, GPT-4o Mini, o-Series | Tier 1-5 |
-| Google | Gemini Flash, Gemini Pro | Free, Pay-as-you-go |
-| Moonshot | Kimi K2.5 | Standard |
-| Mistral | Large, Medium, Small, Codestral | Experiment, Production |
-| Cohere | Command-R, Command-R-Plus | Trial, Production |
-| Groq | Llama 3.3, Llama 3.1, Gemma2 | Free, Developer |
+- **Timeline chart** — token usage over time with Models / Agents / Both filter toggle
+- **Model cards** — token counts and request counts per model, sorted by most used
+- **Agent activity** — breakdown of which agent made how many requests
+- **Session heatmap** — activity distribution by hour of day
+- **Token efficiency** — cache hit ratio and average prompt size
+- **System health strip** — RAM (VM-aware on macOS), disk, uptime, and OpenClaw version
+- **Time period selector** — Hour / Day / Week / Month / Year (keyboard shortcuts `1`–`5`)
+- **Dark theme** — `#0a0e1a` background with 🦞 favicon
+- **Localhost-only** — reads `~/.openclaw/agents/*/sessions/*.jsonl`; no network calls
 
 ## Quick Start
 
 ```bash
-# Real data (reads ~/.openclaw/agents/main/sessions/)
-python3 scripts/usage-dashboard-generic.py
+node server.js
+```
 
-# Custom output path
-python3 scripts/usage-dashboard-generic.py dashboard.html
+Open **http://localhost:7842** in your browser.
 
-# Demo mode
-python3 scripts/usage-dashboard-generic.py dashboard.html --demo
+### Custom port
 
-# Open in browser
-open ~/openclaw-usage-dashboard.html
+```bash
+node server.js --port 8080
+```
+
+## Install via ClawHub
+
+```bash
+openclaw skills install openclaw-usage-dashboard
 ```
 
 ## Requirements
 
-- Python 3.8+ (stdlib only — zero dependencies)
-- `ANTHROPIC_API_KEY` in env (optional, for live Anthropic quota gauges)
+- Node.js 18+
+- No `npm install` needed — zero external dependencies
 
-## Install as OpenClaw Skill
+## Platform Support
 
-Copy to your OpenClaw skills directory:
+| Platform | Supported |
+|----------|-----------|
+| macOS    | ✅        |
+| Linux    | ✅        |
+| Windows  | ✅        |
 
-```bash
-cp -r . ~/.openclaw/workspace/skills/openclaw-usage-dashboard/
-```
+## Roadmap
 
-## Customization
-
-### Add models
-
-Add to the `PRICES` dict in the script (price per 1M tokens):
-
-```python
-"provider/model-name": {"input": 2.50, "output": 10.00, "cache_read": 1.25, "cache_write": 2.50}
-```
-
-### Configure plan limits
-
-Edit `PROVIDER_REGISTRY` in the script to adjust plan budgets. Consumer plan limits (Pro, Max, Team) are estimates — providers don't always publish exact budgets.
-
-See `references/prices.md` for current pricing across all providers.
+- Rate limits tracking — [GitHub issue #55934](https://github.com/openclaw/openclaw/issues/55934)
 
 ## License
 
