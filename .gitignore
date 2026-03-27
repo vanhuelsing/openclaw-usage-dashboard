@@ -1,4 +1,4 @@
-*.skill
 *.pyc
 __pycache__/
 .DS_Store
+dynamic-design-constraints.md
