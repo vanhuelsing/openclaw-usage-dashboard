@@ -49,6 +49,10 @@ openclaw skills install openclaw-usage-dashboard
 | Linux    | ✅        |
 | Windows  | ✅        |
 
+## Security
+
+`server.js` uses `child_process.execSync` for **system health only** — fixed commands like `vm_stat`, `df`, `powershell` (disk/RAM info) and `openclaw version`. No user input is ever interpolated into a shell command. All calls have hard timeouts and try/catch wrappers. Data never leaves localhost.
+
 ## Roadmap
 
 - Rate limits tracking — [GitHub issue #55934](https://github.com/openclaw/openclaw/issues/55934)

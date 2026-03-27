@@ -14,6 +14,14 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+// child_process is used ONLY for fixed, hardcoded system commands:
+//   - vm_stat, memory_pressure (macOS RAM info)
+//   - df (Linux/macOS disk free)
+//   - powershell / wmic (Windows disk free)
+//   - openclaw version (version string)
+//   - xdg-open / open (auto-open browser on start)
+// No user input is ever interpolated into any shell command.
+// All calls have explicit timeouts and are wrapped in try/catch.
 const { execSync } = require('child_process');
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
